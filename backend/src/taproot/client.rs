@@ -1,5 +1,5 @@
 use anyhow::Result;
-use tracing::{info, error};
+use tracing::info;
 
 pub struct TapdClient {
     endpoint: String,

@@ -2,9 +2,9 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use crate::{api::handlers, types::AppState};
+use crate::api::handlers;
 
-pub fn create_routes() -> Router<AppState> {
+pub fn create_routes() -> Router {
     Router::new()
         .route("/assets", get(handlers::list_assets))
         .route("/assets/:id/balance", get(handlers::get_asset_balance))

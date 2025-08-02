@@ -1,4 +1,4 @@
-use sqlx::{PgPool, Pool, Postgres};
+use sqlx::PgPool;
 use anyhow::Result;
 use tracing::info;
 
@@ -10,30 +10,30 @@ pub async fn init_db() -> Result<PgPool> {
     
     let pool = PgPool::connect(&database_url).await?;
     
-    // Run migrations
-    sqlx::migrate!("./migrations").run(&pool).await?;
+    // TODO: Run migrations in production
+    // sqlx::migrate!("./migrations").run(&pool).await?;
     
     Ok(pool)
 }
 
 pub async fn get_asset_balance(pool: &PgPool, asset_id: &str) -> Result<u64> {
-    let row = sqlx::query!(
-        "SELECT balance FROM asset_balances WHERE asset_id = $1",
-        asset_id
+    let row = sqlx::query_as::<_, (Option<i64>,)>(
+        "SELECT balance FROM asset_balances WHERE asset_id = $1"
     )
+    .bind(asset_id)
     .fetch_optional(pool)
     .await?;
     
-    Ok(row.map(|r| r.balance as u64).unwrap_or(0))
+    Ok(row.map(|r| r.0.unwrap_or(0) as u64).unwrap_or(0))
 }
 
 pub async fn update_asset_balance(pool: &PgPool, asset_id: &str, balance: u64) -> Result<()> {
-    sqlx::query!(
+    sqlx::query(
         "INSERT INTO asset_balances (asset_id, balance) VALUES ($1, $2)
-         ON CONFLICT (asset_id) DO UPDATE SET balance = $2, updated_at = NOW()",
-        asset_id,
-        balance as i64
+         ON CONFLICT (asset_id) DO UPDATE SET balance = $2, updated_at = NOW()"
     )
+    .bind(asset_id)
+    .bind(balance as i64)
     .execute(pool)
     .await?;
     

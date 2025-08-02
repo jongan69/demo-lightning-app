@@ -3,7 +3,10 @@
     "allow": [
       "Bash(cargo:*)",
       "Bash(npm install:*)",
-      "Bash(npx install-expo-modules:*)"
+      "Bash(npx install-expo-modules:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }

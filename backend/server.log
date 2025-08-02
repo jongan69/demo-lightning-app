@@ -1,0 +1,68 @@
+warning: unused import: `storage::database`
+  --> src/main.rs:15:5
+   |
+15 | use storage::database;
+   |     ^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `types::*`
+  --> src/main.rs:16:5
+   |
+16 | use types::*;
+   |     ^^^^^^^^
+
+warning: function `init_db` is never used
+ --> src/storage/database.rs:5:14
+  |
+5 | pub async fn init_db() -> Result<PgPool> {
+  |              ^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+
+warning: function `get_asset_balance` is never used
+  --> src/storage/database.rs:19:14
+   |
+19 | pub async fn get_asset_balance(pool: &PgPool, asset_id: &str) -> Result<u64> {
+   |              ^^^^^^^^^^^^^^^^^
+
+warning: function `update_asset_balance` is never used
+  --> src/storage/database.rs:30:14
+   |
+30 | pub async fn update_asset_balance(pool: &PgPool, asset_id: &str, balance: u64) -> Result<()> {
+   |              ^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `TapdClient` is never constructed
+ --> src/taproot/client.rs:4:12
+  |
+4 | pub struct TapdClient {
+  |            ^^^^^^^^^^
+
+warning: associated items `new`, `list_assets`, `send_asset`, and `create_invoice` are never used
+  --> src/taproot/client.rs:9:12
+   |
+8  | impl TapdClient {
+   | --------------- associated items in this implementation
+9  |     pub fn new(endpoint: String) -> Self {
+   |            ^^^
+...
+13 |     pub async fn list_assets(&self) -> Result<Vec<crate::types::TaprootAsset>> {
+   |                  ^^^^^^^^^^^
+...
+19 |     pub async fn send_asset(&self, transfer: &crate::types::AssetTransfer) -> Result<String> {
+   |                  ^^^^^^^^^^
+...
+25 |     pub async fn create_invoice(&self, invoice: &crate::types::AssetInvoice) -> Result<String> {
+   |                  ^^^^^^^^^^^^^^
+
+warning: struct `AppState` is never constructed
+ --> src/types.rs:7:12
+  |
+7 | pub struct AppState {
+  |            ^^^^^^^^
+  |
+  = note: `AppState` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: `taproot-backend` (bin "taproot-backend") generated 8 warnings (run `cargo fix --bin "taproot-backend"` to apply 2 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.40s
+     Running `target/debug/taproot-backend`

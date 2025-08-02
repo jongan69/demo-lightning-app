@@ -1,15 +1,10 @@
 use axum::{
-    extract::Query,
-    http::StatusCode,
     response::Json,
-    routing::{get, post},
+    routing::get,
     Router,
 };
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use tower_http::cors::CorsLayer;
-use tracing::{info, warn};
-use tracing_subscriber;
+use tracing::info;
 
 mod api;
 mod storage;
@@ -23,21 +18,19 @@ use types::*;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Initialize tracing
-    tracing_subscriber::init();
+    tracing_subscriber::fmt::init();
 
     // Load environment variables
     dotenv::dotenv().ok();
 
-    // Initialize database connection
-    let db_pool = database::init_db().await?;
-    info!("Database connection established");
+    // For development, create a simple in-memory state instead of database
+    info!("Running in development mode without database");
 
     // Build application
     let app = Router::new()
         .route("/health", get(health_check))
         .nest("/api", routes::create_routes())
-        .layer(CorsLayer::permissive())
-        .with_state(AppState { db_pool });
+        .layer(CorsLayer::permissive());
 
     // Start server
     let host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());

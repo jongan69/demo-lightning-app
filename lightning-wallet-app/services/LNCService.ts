@@ -1,5 +1,5 @@
 import LNC from '@lightninglabs/lnc-rn';
-import EncryptedStorage from 'react-native-encrypted-storage';
+import * as SecureStore from 'expo-secure-store';
 import CryptoJS from 'crypto-js';
 
 export interface LNCConfig {
@@ -223,7 +223,7 @@ export class LNCService {
   private async storeCredentials(credentials: StoredCredentials, password: string): Promise<void> {
     try {
       const encrypted = CryptoJS.AES.encrypt(JSON.stringify(credentials), password).toString();
-      await EncryptedStorage.setItem('lnc_credentials', encrypted);
+      await SecureStore.setItemAsync('lnc_credentials', encrypted);
     } catch (error) {
       console.error('Failed to store credentials:', error);
       throw error;
@@ -232,7 +232,7 @@ export class LNCService {
 
   private async getStoredCredentials(password: string): Promise<StoredCredentials | null> {
     try {
-      const encrypted = await EncryptedStorage.getItem('lnc_credentials');
+      const encrypted = await SecureStore.getItemAsync('lnc_credentials');
       if (!encrypted) {
         return null;
       }
@@ -253,7 +253,7 @@ export class LNCService {
 
   async clearStoredCredentials(): Promise<void> {
     try {
-      await EncryptedStorage.removeItem('lnc_credentials');
+      await SecureStore.deleteItemAsync('lnc_credentials');
     } catch (error) {
       console.error('Failed to clear stored credentials:', error);
     }
