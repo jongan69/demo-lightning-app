@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo:*)",
+      "Bash(npm install:*)",
+      "Bash(npx install-expo-modules:*)"
+    ],
+    "deny": []
+  }
+}
