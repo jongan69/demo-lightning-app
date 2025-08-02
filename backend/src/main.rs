@@ -1,19 +1,14 @@
-use axum::{
-    response::Json,
-    routing::get,
-    Router,
-};
+use axum::Router;
 use tower_http::cors::CorsLayer;
 use tracing::info;
+use std::sync::Arc;
 
-mod api;
-mod storage;
-mod taproot;
-mod types;
-
-use api::routes;
-use storage::database;
-use types::*;
+// Use the lib module structure
+use taproot_backend::{
+    api::routes,
+    taproot::client::TapdClient,
+    types::*,
+};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -23,14 +18,35 @@ async fn main() -> anyhow::Result<()> {
     // Load environment variables
     dotenv::dotenv().ok();
 
-    // For development, create a simple in-memory state instead of database
-    info!("Running in development mode without database");
+    // Initialize Taproot Assets client
+    let gateway_url = std::env::var("TAPROOT_GATEWAY_URL")
+        .unwrap_or_else(|_| "http://127.0.0.1:8080".to_string());
+    let tapd_client = Arc::new(TapdClient::new(gateway_url.clone()));
+    
+    info!("Connecting to Taproot Assets gateway");
+
+    // Initialize HTTP client and configuration
+    let http_client = Arc::new(reqwest::Client::new());
+    let base_url = BaseUrl(gateway_url.clone());
+    let macaroon_hex = MacaroonHex(
+        std::env::var("TAPROOT_MACAROON_HEX")
+            .unwrap_or_else(|_| "".to_string())
+    );
+
+    // Create application state
+    let app_state = AppState {
+        tapd_client,
+        http_client,
+        base_url,
+        macaroon_hex,
+    };
 
     // Build application
     let app = Router::new()
-        .route("/health", get(health_check))
         .nest("/api", routes::create_routes())
-        .layer(CorsLayer::permissive());
+        .merge(taproot_backend::gateway::routes::create_taproot_routes())
+        .layer(CorsLayer::permissive())
+        .with_state(app_state);
 
     // Start server
     let host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
@@ -45,10 +61,4 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn health_check() -> Json<serde_json::Value> {
-    Json(serde_json::json!({
-        "status": "healthy",
-        "timestamp": chrono::Utc::now(),
-        "service": "taproot-backend"
-    }))
-}
+

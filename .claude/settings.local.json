@@ -6,7 +6,10 @@
       "Bash(npx install-expo-modules:*)",
       "Bash(curl:*)",
       "Bash(pkill:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(git clone:*)",
+      "Bash(touch:*)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }
